@@ -1,0 +1,73 @@
+# 「n版」または「n版m刷」の特定タグが push されると、
+# 電子版および印刷用 PDF を添付したリリースが作成します。
+
+name: Publish and Release PDF
+
+on:
+  push:
+    tags:
+      - '*版'
+      - '*版*刷'
+
+permissions:
+  contents: write
+
+jobs:
+  publish-and-release-pdf:
+    name: Build and Publish PDF
+    runs-on: ubuntu-latest
+
+    # 環境変数を定義
+    env:
+      # 生成される PDF のパス
+      EBOOK_PDF_PATH: ./book/output/ebook.pdf
+      EBOOK_COVERED_PDF_PATH: ./book/output/ebook_covered.pdf
+      PRESS_PDF_PATH: ./book/output/press.pdf
+      COVER_PNG_PATH: ./book/cover/cover.png
+      COVER_PSD_PATH: ./book/cover/*.psd
+    
+    steps:
+      # リポジトリをチェックアウト
+      - name: Checkout repository
+        uses: actions/checkout@v6
+
+      # Node.jsをセットアップ
+      - name: Setup Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version-file: '.node-version'
+      
+      # PDFを作成する
+      - name: make PDF
+        run: |
+          corepack enable
+          yarn install --immutable
+          yarn pdf
+          if [ ! -f "${EBOOK_PDF_PATH}" ]; then
+            echo "エラー: 電子版 PDF の生成に失敗しました。"
+            exit 1
+          fi
+
+          yarn cover
+          if [ ! -f "${EBOOK_COVERED_PDF_PATH}" ]; then
+            echo "ワーニング: 電子版 PDF の表紙付けに失敗しました。"
+          fi
+
+          make press
+          if [ ! -f "${PRESS_PDF_PATH}" ]; then
+            echo "エラー: 電子版 PDF の生成に失敗しました。"
+            exit 1
+          fi
+          
+      # リリースの作成
+      - name: Release
+        uses: softprops/action-gh-release@a06a81a03ee405af7f2048a818ed3f03bbf83c7b # v2.5.0
+        with:
+          generate_release_notes: true
+          fail_on_unmatched_files: false
+          files: |
+            ${{ env.EBOOK_PDF_PATH }}
+            ${{ env.EBOOK_COVERED_PDF_PATH }}
+            ${{ env.PRESS_PDF_PATH }}
+            ${{ env.COVER_PNG_PATH }}
+            ${{ env.COVER_PSD_PATH }}
