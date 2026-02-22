@@ -3,3 +3,10 @@
     word-wrap: break-word;
     white-space: nowrap;
 }
+
+/* 2カラム画像（Markdownテーブル）
+table img {
+    display: block;
+    width: 100%;
+    height: auto;
+} */
