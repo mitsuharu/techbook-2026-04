@@ -1,6 +1,6 @@
 module.exports = {
-  title: '技術同人誌テンプレート_title',
-  author: '技術同人誌テンプレート_author',
+  title: 'AMD-BC-250 と遊ぶ！！',
+  author: '江本光晴',
   language: 'ja',
   size: 'A5',
   theme: [
@@ -13,8 +13,12 @@ module.exports = {
     'index.md',
     // はじめに
     'preface.md',
+
     // 各章の原稿
-    'sample_chapter.md',
+    'ch01.md',
+    'ch02.md',
+    'ch03.md',
+    'ch04.md',
 
     // 著者紹介
     'authors.md',
